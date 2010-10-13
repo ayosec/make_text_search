@@ -1,27 +1,30 @@
+
+require "make-text-search/adapters/postgresql_ts"
+
 module MakeTextSearch
   module ConnectionAdapterHelpers
 
-    # Returns true if the database has ts_ support in PostgreSQL
-    def has_text_search_for_postgresql?
-      @has_text_search_for_postgresql ||=
+    # Returns the MakeTextSearch adapter for the current connection
+    def text_search_adapter
+      @text_search_adapter ||=
         begin
-          select_one("select to_tsquery('test') as fn").has_key?("fn")
-        rescue ActiveRecord::StatementInvalid
-          false
+          # TODO Use a list adapter
+          if Adapters::PostgreSQL.is_available?(self)
+            Adapters::PostgreSQL.new(self)
+          else
+            # TODO Generic implementation (for SQLite3, etc)
+            raise NotImplementedError, "There is no adapter for #{self}"
+          end
         end
     end
 
+    # Create the text_search_documents table
     def create_text_search_documents_table(table_name)
-      if has_text_search_for_postgresql?
-        execute %[CREATE TABLE #{table_name} (record_type varchar(300) NOT NULL, record_id integer NOT NULL, language varchar(20), document tsvector)]
-        execute %[CREATE INDEX #{table_name}_idx ON #{table_name} USING gin(document)]
-      else
-        # TODO Generic implementation (for SQLite3, etc)
-      end
+      text_search_adapter.create_text_search_documents_table table_name
     end
   end
 
-  module SchemaDumperHelpers
+  module SchemaDumperHelpers #:nodoc:
     def self.included(cls)
       cls.alias_method_chain :table, :make_text_search
     end
