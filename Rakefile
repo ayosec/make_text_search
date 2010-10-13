@@ -10,6 +10,8 @@ namespace :test do
       Dir.chdir "/tmp"
       system "rm", "-fr", APPLICATION_NAME if File.directory?(APPLICATION_NAME)
       system "rails", "new", APPLICATION_NAME, "-d", adapter, "-G", "-J"
+
+      # TODO Use a Rails template http://m.onkey.org/2008/12/4/rails-templates http://api.rubyonrails.org/classes/Rails/Generators/Actions.html
       Dir.chdir APPLICATION_NAME
 
       if db_user = ENV["DB_USER"]
@@ -29,6 +31,10 @@ namespace :test do
 
       ENV["RAILS_ENV"] = "test"
       system "rails", "g", "text_search:migration"
+      system "rails", "g", "model", "Post", "title:string", "content:text"
+
+      File.open("app/models/post.rb", "a") {|f| f.puts "\nPost.has_text_search :title, :content" }
+
       exec "rake", "db:create", "db:migrate", "test", "db:drop"
     end)
   end
