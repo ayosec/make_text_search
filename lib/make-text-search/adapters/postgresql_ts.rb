@@ -38,15 +38,17 @@ module MakeTextSearch
         table_name = Rails.application.config.make_text_search.table_name
         record_type = quote record_class.name
         record_id = quote record.id
-        language = quote record.text_search_language
+        language = record.text_search_language
 
-        document = "to_tsvector(#{language}, #{quote record.text_search_build_document})"
+        # If language is nil the tsvector will be generated without language
+        document = "to_tsvector(#{language ? quote(language.to_s) + ", " : ""}#{quote record.text_search_build_document})"
 
+        # Reduce the number of operations in the index using SELECT+UPDATE instead of DELETE+INSERT
         if connection.select_value("SELECT count(*) FROM #{table_name} WHERE #{_where_record record}").to_i == 0
           connection.insert(%[INSERT INTO #{table_name}
                               (record_type, record_id, language, document)
                              VALUES
-                              (#{record_type}, #{record_id}, #{language}, #{document})])
+                              (#{record_type}, #{record_id}, #{quote language}, #{document})])
         else
           connection.update(%[UPDATE #{table_name} SET document = #{document} WHERE #{_where_record record}])
         end

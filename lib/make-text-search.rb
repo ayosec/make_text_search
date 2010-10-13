@@ -14,7 +14,7 @@ module MakeTextSearch
   class Railtie < ::Rails::Railtie
     config.make_text_search = ActiveSupport::OrderedOptions.new
     config.make_text_search.table_name = "text_search_documents"
-    config.make_text_search.default_language = "english"
+    config.make_text_search.default_language = nil
 
     generators do
       load "generators/migration.rb"

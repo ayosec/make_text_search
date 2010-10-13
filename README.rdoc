@@ -62,11 +62,11 @@ will be
 
 === Language
 
-Every document is parsed using a language. +english+ is the default language for every record. You can change it with +config.make_text_search.default_language+. For example, add
+The documents can be parsed using a language. You can set the default language with +config.make_text_search.default_language+. The initial value is nil, which means that the documents are parsed in a agnostic way.
+
+If you want to set the default language add this line to the +config/application.rb+ file.
 
   config.make_text_search.default_language = "spanish"
-
-to the +config/application.rb+ file.
 
 If you want to have a different language for every record you have to implement the +text_search_language+ instance method. For example
 
