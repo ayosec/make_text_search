@@ -13,7 +13,10 @@ gem "make-text-search", :path => ENV["MTS_GEM_PATH"]
 generate "text_search:migration"
 generate "model", "Post", "title:string", "content:text"
 
-File.open("app/models/post.rb", "a") {|f| f.puts "\nPost.has_text_search :title, :content" }
+File.open("app/models/post.rb", "a") do |f|
+  f.puts "\nPost.has_text_search :title, :filter => :substrings"
+  f.puts "Post.has_text_search :content, :filter => [:substrings, :strip_html]"
+end
 
 # Copy tests from the gem
 Dir["#{ENV["MTS_GEM_PATH"]}/test/*_test.rb"].each do |filename|

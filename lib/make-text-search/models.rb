@@ -14,7 +14,11 @@ module MakeTextSearch
     module ClassMethods
       def has_text_search(*fields)
         options = fields.extract_options!
-        #options.assert_valid_keys :filter
+        options.assert_valid_keys :filter
+
+        if options[:filter]
+          options[:filter] = [options[:filter]].flatten.map! {|filter_name| "make_text_search/#{filter_name}_filter".camelize.constantize }
+        end
 
         fields.each do |field|
           self.text_search_fields.push([field, options])
@@ -22,7 +26,6 @@ module MakeTextSearch
       end
 
       def search_text(query)
-        #where "#{table_name}.id IN (#{MakeTextSearch.})"
         where MakeTextSearch.build_condition(self, query)
       end
     end
@@ -44,8 +47,19 @@ module MakeTextSearch
     end
 
     def text_search_build_document
-      # TODO filters
-      self.class.text_search_fields.map {|ts_field| send(ts_field[0]).try(:to_s) }.compact.join(" ")
+      self.class.text_search_fields.map do |ts_field|
+        field_name, options = ts_field
+
+        if value = send(field_name)
+          value = value.to_s
+
+          if filters = options[:filter]
+            filters.each {|f| value = f.apply_filter(self, value) }
+          end
+
+          value
+        end
+      end.compact.join(" ")
     end
   end
 end
