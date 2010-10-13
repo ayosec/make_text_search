@@ -45,7 +45,7 @@ The content added to the index can be filtered. Right now there are two filters:
 
   class Post < ActiveRecord::Base
     has_text_search :title, :filter => :substrings
-    has_text_search :content, :intro :filter => [:strip_html, :substrings]
+    has_text_search :content, :intro, :filter => [:strip_html, :substrings]
   end
 
 You can use several filters using an array. The order is important. If you use both +:substrings+ and +:strip_html+, +:strip_html+ should be the first.
@@ -61,6 +61,35 @@ will be
 
   Ir a Google España
 
+=== Language
+
+Every document is parsed using a language. +english+ is the default language for every record. You can change it with +config.make_text_search.default_language+. For example, add
+
+  config.make_text_search.default_language = "spanish"
+
+to the +config/application.rb+ file.
+
+If you want to have a different language for every record you have to implement the +text_search_language+ instance method. For example
+
+  class Post < ActiveRecord::Base
+    has_text_search :title, :filter => :substrings
+    has_text_search :content, :intro, :filter => [:strip_html, :substrings]
+
+    def text_search_language
+      case locale
+      when "es" "spanish"
+      when "en" "english"
+      when "de" "german"
+      when "it" "italian"
+      else
+        Rails.application.config.make_text_search.default_language
+      end
+    end
+  end
+
+You can get the available languages of your PostgreSQL server with
+
+  select * from pg_ts_dict;
 
 == Search
 
@@ -70,6 +99,8 @@ To perform search you have to use the scope #search_text
   Post.search_text("foo")
 
   Post.published.search_text("foo & bar").paginate(:page => params[:page])
+
+The query language is the same used by PostgreSQL. See http://www.postgresql.org/docs/8.4/static/datatype-textsearch.html#DATATYPE-TSQUERY
 
 == TODO
 
