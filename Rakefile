@@ -28,6 +28,7 @@ namespace :test do
       end
 
       ENV["RAILS_ENV"] = "test"
+      system "rails", "g", "text_search:migration"
       exec "rake", "db:create", "db:migrate", "test", "db:drop"
     end)
   end
