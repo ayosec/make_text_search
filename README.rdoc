@@ -1,0 +1,76 @@
+= MakeTextSearch
+
+MakeTextSearch es una herramienta que te permitirá hacer búsquedas full-text utilizando el motor de tu base de datos de un modo muy sencillo.
+
+Existen herramientas como {Sphinx}[http://sphinxsearch.com/] o {Lucene}[http://lucene.apache.org/] muy potentes y muy rápidas, pero que requieren un esfuerzo extra de configuración y mantenimiento, al ser herramientas al margen de la base de datos. Algunos RDBMS, como PostgreSQL o MySQL, tienen sus propios motores para realizar búsqueads full-text, con lo que las tareas de configuración y mantenimiento se reducen.
+
+En esta primera versión sólo se ha implementado soporte para {PostgreSQL}[http://www.postgresql.org/docs/8.3/static/textsearch.html]. En el futuro se implementará soporte para {MySQL}[http://dev.mysql.com/doc/refman/5.1/en/fulltext-search.html], entre otros. En el caso de usar una base de datos que no implemente algún motor de búsquedas full-text se proveerá de uno similar a través de +LIKE+
+
+MakeTextSearch funciona con Rails 3
+
+== Installation
+
+En el fichero +Gemfile+ añade
+
+  gem "make-text-search"
+
+Después del +bundle install+ genera la migración con la tabla que indexará el contenido
+
+  rails generate text_search:migration
+
+== Usage
+
+En los modelos donde quieras hacer búsquedas debes declarar los campos que se guardarán en el índice con +has_text_search+
+
+  class Post < ActiveRecord::Base
+    has_text_search :title, :content
+  end
+
+Los campos que se añadan al índice pueden ser virtuales
+
+  class Post < ActiveRecord::Base
+    belongs_to :user
+
+    # Add the user name to the index
+    def user_name
+      user.try :name
+    end
+
+    has_text_search :title, :content, :user_name
+  end
+
+=== Filtros
+
+El contenido que se añadirá al índice se puede filtrar para adaptarlo a las búsquedas. Ahora mismo existen dos filtros: +:substrings+ y +:strip_html+
+
+  class Post < ActiveRecord::Base
+    has_text_search :title, :filter => :substrings
+    has_text_search :content, :intro :filter => [:strip_html, :substrings]
+  end
+
+Se pueden declarar varios filtros utilizando un array. Es importante el orden. Si se usan +:substrings+ y +:strip_html+, +:strip_html+ debería ser el primero
+
++:substrings+ permite hacer búsquedas dentro de las palabras. Por ejemplo, la palabra +knowledge+ podría ser encontrada con +owled+ utilizando este filtro. Sin el filtro sólo se encontraría si se busca la palabra completa
+
++:strip_html+ elimina las etiquetas HTML y traduce las entities a su versión en UTF-8. Por ejemplo
+
+  Ir a <a href="http://www.google.es">Google Espa&ntilde;a</a>
+
+se quedaría como
+
+  Ir a Google España
+
+
+== Búsquedas
+
+Para realizar las búsquedas hay que usar el scope #search_text
+
+  Post.search_text("foo")
+
+  Post.published.search_text("foo & bar").paginate(:page => params[:page])
+
+== TODO
+
+* Query builder. Add & and | operators
+* Option :language in #search_text
+* RDoc-ize methods
