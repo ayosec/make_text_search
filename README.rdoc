@@ -52,7 +52,6 @@ You can use several filters using an array. The order is important. If you use b
 
 +:substrings+ let you search inside the words. For example, the word +knowledge+ can be found with +owled+ if you filter the content with +:substrings+.
 
-+:strip_html+ elimina las etiquetas HTML y traduce las entities a su versión en UTF-8. Por ejemplo
 +:strip_html+ removes the HTML tags and it translates HTML entities to its equivalent in UTF-8:
 
   Ir a <a href="http://www.google.es">Google Espa&ntilde;a</a>
@@ -101,6 +100,11 @@ To perform search you have to use the scope #search_text
   Post.published.search_text("foo & bar").paginate(:page => params[:page])
 
 The query language is the same used by PostgreSQL. See http://www.postgresql.org/docs/8.4/static/datatype-textsearch.html#DATATYPE-TSQUERY
+
+= Resources
+
+* http://www.slideshare.net/billkarwin/full-text-search-in-postgresql
+* http://www.sai.msu.su/~megera/postgres/fts/fts.pdf
 
 == TODO
 
