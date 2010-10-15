@@ -26,7 +26,7 @@ module MakeTextSearch
       end
 
       def search_text(query)
-        where MakeTextSearch.build_condition(self, query)
+        connection.text_search_adapter.scope_search_text(self, query)
       end
     end
 

@@ -2,7 +2,6 @@ module MakeTextSearch
 
   ActiveSupport.on_load(:active_record) do
     require 'make-text-search/models'
-    require 'make-text-search/query'
     require 'make-text-search/schema'
     require 'make-text-search/filters'
 

@@ -62,6 +62,19 @@ module MakeTextSearch
         "record_type = #{quote record.class.name} AND record_id = #{quote record.id}"
       end
 
+
+      # Query actions
+      def scope_search_text(model, query, language = Rails.application.config.make_text_search.default_language)
+        db_connection = model.connection
+
+        if language
+          query = "to_tsquery(#{db_connection.quote language}, #{db_connection.quote query})"
+        else
+          query = "to_tsquery(#{db_connection.quote query})"
+        end
+        model.where %[#{model.table_name}.id IN (SELECT record_id FROM #{Rails.application.config.make_text_search.table_name} WHERE record_type = #{db_connection.quote model.name} AND document @@ #{query})]
+      end
+
     end
   end
 end
