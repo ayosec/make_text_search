@@ -1,7 +1,7 @@
 
 Gem::Specification.new do |s|
   s.name = "make-text-search"
-  s.version = "0.1"
+  s.version = "0.1.1"
   s.date = "2010-10-13"
   s.authors = ["Ayose Cazorla"]
   s.email = "ayosec@gmail.com"
