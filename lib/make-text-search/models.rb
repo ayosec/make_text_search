@@ -31,13 +31,13 @@ module MakeTextSearch
     end
 
     def text_search_update_document
-      if not self.class.text_search_fields.empty?
+      if not self.class.text_search_fields.blank?
         self.class.connection.text_search_adapter.update_document self
       end
     end
 
     def text_search_remove_document
-      if not self.class.text_search_fields.empty?
+      if not self.class.text_search_fields.blank?
         self.class.connection.text_search_adapter.remove_document self
       end
     end

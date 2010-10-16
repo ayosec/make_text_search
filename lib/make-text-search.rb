@@ -4,6 +4,7 @@ module MakeTextSearch
     require 'make-text-search/models'
     require 'make-text-search/schema'
     require 'make-text-search/filters'
+    require 'make-text-search/document'
 
     include ModelHelpers
     class ActiveRecord::ConnectionAdapters::AbstractAdapter; include ConnectionAdapterHelpers; end
