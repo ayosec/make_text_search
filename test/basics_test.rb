@@ -62,4 +62,13 @@ class BasicsTest < ActiveSupport::TestCase
     end
   end
 
+  test "STI classes save the top parent" do
+    Admin.create :name => "first admin", :description => "the first user created"
+    assert_equal 1, User.count
+    assert_equal "first admin", User.first.name
+
+    assert_equal 1, User.search_text("first & created").count
+    assert_equal User.first, Admin.search_text("first & created").first
+  end
+
 end

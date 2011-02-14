@@ -28,6 +28,16 @@ module MakeTextSearch
       def search_text(query)
         connection.text_search_adapter.scope_search_text(self, query)
       end
+
+      def text_search_class_name
+        klass = self
+        while klass and klass.superclass != ActiveRecord::Base
+          klass = klass.superclass
+          break
+        end
+
+        klass and klass.name
+      end
     end
 
     def text_search_update_document

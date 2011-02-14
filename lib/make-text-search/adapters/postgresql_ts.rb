@@ -34,7 +34,7 @@ module MakeTextSearch
         record_class = record.class
         return if record_class.text_search_fields.empty?
 
-        record_type, record_id = record.class, record.id
+        record_type, record_id = record_class.text_search_class_name, record.id
         unless document = Document.find_by_record_type_and_record_id(record_type, record_id)
           document = Document.new
           document.record = record
@@ -48,12 +48,12 @@ module MakeTextSearch
       end
 
       def remove_document(record)
-        Document.delete_all ["record_type = ? AND record_id = ?", record.class, record.id]
+        Document.delete_all ["record_type = ? AND record_id = ?", record.class.text_search_class_name, record.id]
       end
 
       # Query actions
       def scope_search_text(model, query, language = Rails.application.config.make_text_search.default_language)
-        document_query = Document.select("record_id").where("record_type = :type AND document @@ to_tsquery(#{language ? ":language, " : ""}:query)", :type => model.name, :language => language, :query => query)
+        document_query = Document.select("record_id").where("record_type = :type AND document @@ to_tsquery(#{language ? ":language, " : ""}:query)", :type => model.text_search_class_name, :language => language, :query => query)
         model.where %[#{model.table_name}.id IN (#{document_query.to_sql})]
       end
 
